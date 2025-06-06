@@ -32,6 +32,9 @@ sudo dnf -y install code
 # Add Podman
 sudo dnf install -y podman
 
+# Add Flathub
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
 # ZSH
 echo "Installando ZSH"
 sudo dnf -y install zsh
