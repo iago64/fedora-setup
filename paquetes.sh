@@ -14,6 +14,9 @@ sudo dnf install -y kernel-devel kernel-headers gcc gcc-c++ gdb python3 python3-
 # installs nvm (Node Version Manager)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
+# Avoid restart shell
+\. "$HOME/.nvm/nvm.sh"
+
 # download and install Node.js (you may need to restart the terminal)
 nvm install 22
 node -v
