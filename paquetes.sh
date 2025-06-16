@@ -1,14 +1,12 @@
 set -e
 
 # Update
-sudo dnf update
+sudo dnf update -y
 
 # Paquetes Herramientas
-echo "Installando Herramientas Generales"
 sudo dnf install -y vim emacs nano strace openssh curl htop tree wget terminator xclip bless fastfetch net-tools openssh-server valgrind meld
 
 # Lenguajes de Programacion
-echo "Installando Lenguajes y Herramientas de Programacion"
 sudo dnf install -y kernel-devel kernel-headers gcc gcc-c++ gdb python3 python3-pip java-21-openjdk dotnet-sdk-8.0 CUnit make cmake 
 
 # installs nvm (Node Version Manager)
@@ -36,9 +34,7 @@ sudo dnf install -y podman
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 # ZSH
-echo "Installando ZSH"
 sudo dnf -y install zsh
 
 # Oh My ZSH
-echo "Installando Oh My ZSH --> ZSH Cheto"
 sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
