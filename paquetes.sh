@@ -73,14 +73,14 @@ echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com
 sudo dnf -y install code
 
 # Add Flathub
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 # Flatpaks
-flatpak install -y flathub \ 
+flatpak install -y flathub \
     com.discordapp.Discord \
     com.getpostman.Postman \
     com.obsproject.Studio \
-    org.libretro.RetroArch \ 
+    org.libretro.RetroArch \
     com.bitwarden.desktop 
 
 # ZSH
