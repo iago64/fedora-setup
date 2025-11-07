@@ -1,90 +1,80 @@
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
 
-# Update
-sudo dnf update -y
+# --- Update ---
+sudo dnf -y update
 
-# Paquetes Herramientas
-sudo dnf install -y vim \
-    emacs \
-    nano \
-    strace \
-    openssh \
-    curl \
-    htop \
-    tree \
-    wget \
-    terminator \
-    xclip \
-    bless \
-    fastfetch \
-    net-tools \
-    openssh-server \
-    valgrind \
-    meld
+# --- Herramientas básicas ---
+sudo dnf install -y \
+    vim emacs nano strace openssh curl htop tree wget terminator \
+    xclip bless fastfetch net-tools openssh-server valgrind meld
 
-# Lenguajes de Programacion
-sudo dnf install -y kernel-devel \
-    kernel-headers \
-    gcc \
-    gcc-c++ \
-    gdb \
-    python3 \
-    python3-pip \
-    adoptium-temurin-java-repository \
-    temurin-21-jdk \
-    dotnet-sdk-8.0 \
-    CUnit \
-    make \
-    cmake 
+# --- Lenguajes y compiladores ---
+sudo dnf install -y \
+    kernel-devel kernel-headers gcc gcc-c++ gdb python3 python3-pip \
+    adoptium-temurin-java-repository temurin-21-jdk \
+    dotnet-sdk-8.0 CUnit make cmake
 
-sudo update-alternatives --config java
+# Configurar Java (solo si hay más de una versión)
+if [[ $(update-alternatives --list java | wc -l) -gt 1 ]]; then
+    sudo update-alternatives --config java
+fi
 
-# SDKMan
-curl -s "https://get.sdkman.io" | bash
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-sdk install quarkus
-sdk install gradle
-echo "JAVA_HOME=/usr/lib/jvm/temurin-21-jdk" | sudo tee /etc/java/maven.conf
+# --- SDKMAN ---
+if [[ ! -d "$HOME/.sdkman" ]]; then
+    curl -s "https://get.sdkman.io" | bash
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    sdk install quarkus
+    sdk install gradle
+fi
 
-# installs nvm (Node Version Manager)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+# Configurar JAVA_HOME global (si no existe)
+JAVA_CONF="/etc/java/maven.conf"
+if ! grep -q "JAVA_HOME" "$JAVA_CONF" 2>/dev/null; then
+    echo "JAVA_HOME=/usr/lib/jvm/temurin-21-jdk" | sudo tee "$JAVA_CONF" >/dev/null
+fi
 
-# Avoid restart shell
-\. "$HOME/.nvm/nvm.sh"
+# --- NVM / Node.js / PNPM ---
+if [[ ! -d "$HOME/.nvm" ]]; then
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+    source "$HOME/.nvm/nvm.sh"
+fi
 
-# download and install Node.js (you may need to restart the terminal)
+source "$HOME/.nvm/nvm.sh"
 nvm install 24
-node -v
-nvm current
+nvm alias default 24
 corepack enable pnpm
-pnpm -v
 
-# Add Podman
-sudo dnf install -y podman \
-    podman-compose
+# --- Podman ---
+sudo dnf install -y podman podman-compose
+systemctl --user enable --now podman.socket
 
-systemctl --user enable podman.socket
-systemctl --user start podman.socket
-
-# Install Code
+# --- Visual Studio Code ---
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" \
-  | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
+cat <<EOF | sudo tee /etc/yum.repos.d/vscode.repo >/dev/null
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+autorefresh=1
+type=rpm-md
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+EOF
 sudo dnf -y install code
 
-# Add Flathub
+# --- Flatpak + Flathub ---
 sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
-# Flatpaks
-flatpak install -y flathub \
+flatpak install -y --noninteractive flathub \
     com.discordapp.Discord \
     com.getpostman.Postman \
     com.obsproject.Studio \
     org.libretro.RetroArch \
-    com.bitwarden.desktop 
+    com.bitwarden.desktop || true
 
-# ZSH
+# --- ZSH + Oh My Zsh ---
 sudo dnf -y install zsh
-
-# Oh My ZSH
-sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    RUNZSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
