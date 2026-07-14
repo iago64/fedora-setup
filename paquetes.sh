@@ -16,16 +16,6 @@ sudo dnf install -y \
     adoptium-temurin-java-repository dotnet-sdk-10.0 \
     CUnit make cmake
 
-# --- SDKMAN ---
-if [[ ! -d "$HOME/.sdkman" ]]; then
-    curl -s "https://get.sdkman.io" | bash
-    source "$HOME/.sdkman/bin/sdkman-init.sh"
-    sdk install java 21.0.10-amzn
-    sdk install java 25.0.2-amzn
-    sdk install quarkus
-    sdk install gradle
-fi
-
 # --- NVM / Node.js / PNPM ---
 if [[ ! -d "$HOME/.nvm" ]]; then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -54,11 +44,6 @@ gpgcheck=1
 gpgkey=https://packages.microsoft.com/keys/microsoft.asc
 EOF
 sudo dnf -y install code
-
-# --- JetBrains Toolbox ---
-TBA_LINK=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release" | jq -r '.TBA[0].downloads.linux.link')
-wget -qO- "${TBA_LINK:?}" | sudo tar xvzC /opt
-/opt/jetbrains-toolbox-*/bin/jetbrains-toolbox
 
 # --- Flatpak + Flathub ---
 sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -99,3 +84,8 @@ ZSHRC="$HOME/.zshrc"
     echo 'export PATH="$JAVA_HOME/bin:$PATH"'
     echo ""
 } >> "$ZSHRC"
+
+# --- JetBrains Toolbox ---
+TBA_LINK=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release" | jq -r '.TBA[0].downloads.linux.link')
+wget -qO- "${TBA_LINK:?}" | sudo tar xvzC /opt
+/opt/jetbrains-toolbox-*/bin/jetbrains-toolbox
